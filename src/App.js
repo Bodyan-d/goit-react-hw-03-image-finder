@@ -3,7 +3,9 @@ import fetchImagesAPI, { resetPage } from './sourse/images-API';
 import './App.css';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
-import Loader from './components/Loader';
+import Modal from './components/Modal';
+// import Loader from './components/Loader';
+import Loader from 'react-loader-spinner';
 import Error from './components/Error';
 
 class App extends Component {
@@ -12,6 +14,8 @@ class App extends Component {
     error: null,
     imagesSearch: null,
     status: 'idle',
+    modalIsOpen: false,
+    largeImageNow: null,
   };
 
   handleChange = e => {
@@ -27,8 +31,8 @@ class App extends Component {
       this.setState({ status: 'pending' });
 
       resetPage();
-      fetchImagesAPI
-        .fetchImages(this.state.imageName)
+
+      fetchImagesAPI(this.state.imageName)
         .then(imagesOnFeedback => {
           this.setState({
             imagesSearch: imagesOnFeedback.hits,
@@ -36,17 +40,32 @@ class App extends Component {
           });
         })
         .catch(error => this.setState({ error, status: 'rejected' }));
-      console.log(this.state.imagesSearch);
     }
   }
 
   onLoadMoreClick = e => {
-    fetchImagesAPI.fetchImages(this.state.imageName).then(imagesOnFeedback => {
+    fetchImagesAPI(this.state.imageName).then(imagesOnFeedback => {
       console.log(this.state.imagesSearch);
       console.log(imagesOnFeedback.hits);
       this.setState({
         imagesSearch: [...this.state.imagesSearch, ...imagesOnFeedback.hits],
       });
+    });
+  };
+
+  handleOpenModal = e => {
+    if (e.target.className === 'ImageGalleryItem-image') {
+      this.setState({
+        modalIsOpen: !this.state.modalIsOpen,
+        largeImageNow: e.target.alt,
+      });
+    }
+  };
+
+  handleCloseModal = () => {
+    this.setState({
+      modalIsOpen: !this.state.modalIsOpen,
+      largeImageNow: null,
     });
   };
 
@@ -59,6 +78,9 @@ class App extends Component {
             onChange={this.handleChange}
             imageName={this.state.imageName}
           />
+          <div className="container-loader">
+            <Loader type="TailSpin" color="#00BFFF" height={80} width={80} />
+          </div>
         </>
       );
     }
@@ -70,8 +92,9 @@ class App extends Component {
             onChange={this.handleChange}
             imageName={this.state.imageName}
           />
-
-          <Loader />
+          <div className="container-loader">
+            <Loader type="TailSpin" color="#00BFFF" height={80} width={80} />
+          </div>
         </>
       );
     }
@@ -87,7 +110,15 @@ class App extends Component {
           <ImageGallery
             imagesSearch={this.state.imagesSearch}
             loadMore={this.onLoadMoreClick}
+            togleModal={this.handleOpenModal}
           />
+
+          {this.state.modalIsOpen && (
+            <Modal
+              largeImageURL={this.state.largeImageNow}
+              onClose={this.handleCloseModal}
+            />
+          )}
         </>
       );
     }
