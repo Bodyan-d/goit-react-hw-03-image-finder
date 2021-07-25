@@ -19,29 +19,25 @@ class App extends Component {
   };
 
   handleChange = e => {
-    if (!e.target.value.trim()) {
-      return;
-    }
-
     this.setState({ imageName: e.target.value });
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.imageName !== this.state.imageName) {
-      this.setState({ status: 'pending' });
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (prevState.imageName !== this.state.imageName) {
+  //     this.setState({ status: 'pending' });
 
-      resetPage();
+  //     resetPage();
 
-      fetchImagesAPI(this.state.imageName)
-        .then(imagesOnFeedback => {
-          this.setState({
-            imagesSearch: imagesOnFeedback.hits,
-            status: 'resolved',
-          });
-        })
-        .catch(error => this.setState({ error, status: 'rejected' }));
-    }
-  }
+  //     fetchImagesAPI(this.state.imageName)
+  //       .then(imagesOnFeedback => {
+  //         this.setState({
+  //           imagesSearch: imagesOnFeedback.hits,
+  //           status: 'resolved',
+  //         });
+  //       })
+  //       .catch(error => this.setState({ error, status: 'rejected' }));
+  //   }
+  // }
 
   onLoadMoreClick = e => {
     fetchImagesAPI(this.state.imageName).then(imagesOnFeedback => {
@@ -69,18 +65,32 @@ class App extends Component {
     });
   };
 
+  handleFormSubmit = e => {
+    e.preventDefault();
+    this.setState({ status: 'pending' });
+
+    resetPage();
+
+    fetchImagesAPI(this.state.imageName)
+      .then(imagesOnFeedback => {
+        this.setState({
+          imagesSearch: imagesOnFeedback.hits,
+          status: 'resolved',
+        });
+      })
+      .catch(error => this.setState({ error, status: 'rejected' }));
+  };
+
   render() {
     const { status } = this.state;
     if (status === 'idle') {
       return (
         <>
           <Searchbar
+            onSubmit={this.handleFormSubmit}
             onChange={this.handleChange}
             imageName={this.state.imageName}
           />
-          <div className="container-loader">
-            <Loader type="TailSpin" color="#00BFFF" height={80} width={80} />
-          </div>
         </>
       );
     }
@@ -89,6 +99,7 @@ class App extends Component {
       return (
         <>
           <Searchbar
+            onSubmit={this.handleFormSubmit}
             onChange={this.handleChange}
             imageName={this.state.imageName}
           />
@@ -103,6 +114,7 @@ class App extends Component {
       return (
         <>
           <Searchbar
+            onSubmit={this.handleFormSubmit}
             onChange={this.handleChange}
             imageName={this.state.imageName}
           />

@@ -1,9 +1,9 @@
 import React from 'react';
 
-export default function Searchbar({ onChange, imageName }) {
+export default function Searchbar({ onChange, imageName, onSubmit }) {
   return (
     <header className="Searchbar">
-      <form className="SearchForm">
+      <form onSubmit={onSubmit} className="SearchForm">
         <button type="submit" className="SearchForm-button">
           <span className="SearchForm-button-label">Search</span>
         </button>
